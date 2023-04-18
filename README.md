@@ -1,16 +1,54 @@
-# flutter_in_app_purchase_demo
+# Flutter In App Purchase Demo
 
-A new Flutter project.
+Welcome to my Flutter demo project, in this project I will be covering the in_app_purchase package [in_app_purchase](https://pub.dev/packages/in_app_purchase/) , making it easy for developers out there to easily implement in app purchase system in thier apps. 
 
-## Getting Started
+## This Demo will Cover both 
+* In App Products (Non - consumable and Consumable Purchases) 
+* Subscriptions (Weekly, Monthly and Yearly)
 
-This project is a starting point for a Flutter application.
+## Types of Usage Covered
+* Buy Coins - with Consumable Purchase
+* Remove Ads (Admob) - with Non-consumable Purchase
+* Remove Ads (Admob) - with Subscriptions
+* Subscriptions (To activate premium features)
 
-A few resources to get you started if this is your first Flutter project:
+For Android Studio In App Purchase Demo visit: - [Repo ](https://github.com/wdtheprovider/in-app-purchases-subscription)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Pre-requisite 
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+
+Step 1
+
+```txt
+
+Create a new flutter or open your exist project
+
+```
+
+Step 2: Setup
+
+*Packages used in this Flutter project* - Simple copy and paste the following commands into your terminal in your project.
+
+```dart
+flutter pub add onepref
+
+flutter pub add in_app_purchase
+
+```
+
+Step 3: Configuration 
+
+``` txt
+* Config Testing Account and Device
+* Upload your App to Play Store (Either Production or Internal Testing and join the testing program)
+```
+
+Step 4: Implementation
+
+```txt
+
+```
+
+
+
