@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_in_app_purchase_demo/screens/store.dart';
-import 'package:onepref/onepref.dart';
 
 void main() {
   runApp(const MyApp());
@@ -38,9 +37,11 @@ class _MyHomePageState extends State<MyHomePage> {
           child: TextButton(
               onPressed: () => {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: ((context) => const Store())))
+                      context,
+                      MaterialPageRoute(
+                        builder: ((context) => const Store()),
+                      ),
+                    )
                   },
               child: const Text(
                 "Open Store",

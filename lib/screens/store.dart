@@ -1,4 +1,5 @@
 // ignore_for_file: unused_field
+// ignore: avoid_print
 
 import 'dart:async';
 import 'dart:io' show Platform;
@@ -19,8 +20,6 @@ class Store extends StatefulWidget {
   @override
   State<Store> createState() => _StoreState();
 }
-
-const bool _kAutoConsume = true;
 
 //In App Product Ids
 const String coins_10Id = 'test_coins_30';
@@ -52,8 +51,7 @@ class _StoreState extends State<Store> {
   late StreamSubscription<List<PurchaseDetails>> _subscription;
   late List<String> _notFoundIds = <String>[];
   late List<ProductDetails> _products = <ProductDetails>[];
-  late List<PurchaseDetails> _purchases = <PurchaseDetails>[];
-  late List<String> _consumables = <String>[];
+  late final List<PurchaseDetails> _purchases = <PurchaseDetails>[];
   late bool _isAvailable = false;
   late bool _purchasePending = false;
   late bool _loading = true;
@@ -70,8 +68,8 @@ class _StoreState extends State<Store> {
 
     final Stream<List<PurchaseDetails>> purchaseUpdated =
         _inAppPurchase.purchaseStream;
-    _subscription =
-        purchaseUpdated.listen((List<PurchaseDetails> purchaseDetailsList) {
+
+    _subscription =  purchaseUpdated.listen((List<PurchaseDetails> purchaseDetailsList) {
       _listenToPurchaseUpdated(purchaseDetailsList);
       checkSubscription(purchaseDetailsList);
     }, onDone: () {
@@ -79,7 +77,8 @@ class _StoreState extends State<Store> {
     }, onError: (Object error) {
       // handle error here.
     });
-    initStoreInfo();
+
+    establishConnection();
 
     coins = OnePref.getInt("coins") ?? 0;
   }
@@ -90,283 +89,189 @@ class _StoreState extends State<Store> {
     super.dispose();
   }
 
-  Future<void> initStoreInfo() async {
-    final bool isAvailable = await _inAppPurchase.isAvailable();
-
-    if (!isAvailable) {
-      setState(() {
-        _isAvailable = isAvailable;
-        _products = <ProductDetails>[];
-        _purchases = <PurchaseDetails>[];
-        _notFoundIds = <String>[];
-        _consumables = <String>[];
-        _purchasePending = false;
-        _loading = false;
-      });
-      return;
-    }
-
-    final ProductDetailsResponse productDetailResponse =
-        await _inAppPurchase.queryProductDetails(productIds.toSet());
-    if (productDetailResponse.error != null) {
-      setState(() {
-        _queryProductError = productDetailResponse.error!.message;
-        _isAvailable = isAvailable;
-        _products = productDetailResponse.productDetails;
-        _purchases = <PurchaseDetails>[];
-        _notFoundIds = productDetailResponse.notFoundIDs;
-        _consumables = <String>[];
-        _purchasePending = false;
-        _loading = false;
-      });
-      return;
-    }
-
-    if (productDetailResponse.productDetails.isEmpty) {
-      setState(() {
-        _queryProductError = null;
-        _isAvailable = isAvailable;
-        _products = productDetailResponse.productDetails;
-        _purchases = <PurchaseDetails>[];
-        _notFoundIds = productDetailResponse.notFoundIDs;
-        _consumables = <String>[];
-        _purchasePending = false;
-        _loading = false;
-      });
-      return;
-    }
-
-    setState(() {
-      _isAvailable = isAvailable;
-      _products = productDetailResponse.productDetails;
-      _notFoundIds = productDetailResponse.notFoundIDs;
-      _purchasePending = false;
-      _loading = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+          title: const Text(
+        "Store",
+        style: TextStyle(color: Colors.white),
+      )),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            child: Column(children: [
-              Text(
-                OnePref.getBool("subscribed")! ? "" : "GET MORE COINS",
-                style: const TextStyle(
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              !OnePref.getBool("subscribed")!
-                  ? Text(
-                      "You have $coins coin(s)",
-                    )
-                  : const Text(
-                      "Unlimited Coins",
-                    ),
-              const SizedBox(
-                height: 20,
-              ),
-              _buildConnectionCheckTile(),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: GestureDetector(
-                  onTap: () async {
-                    await _inAppPurchase.restorePurchases();
-                  },
-                  child: const Text(
-                    "Restore Subscription",
-                    style: TextStyle(color: Colors.blue, fontSize: 16),
-                  ),
-                ),
-              ),
-              _buildProductList(),
-              Container(
-                  padding: const EdgeInsets.all(10),
-                  child: const Text(
-                    "Terms and Conditions",
-                    textAlign: TextAlign.center,
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
-                  )),
-              const Text(
-                "By subscribing you get access to unlimited coins, all application links and free from ads.",
-                textAlign: TextAlign.center,
-              ),
-            ]),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildConnectionCheckTile() {
-    return _loading
-        ? const Card(child: ListTile(title: Text('Trying to connect...')))
-        : Column(children: [
-            Card(
-              color:
-                  OnePref.getBool("subscribed")! ? Colors.green : Colors.white,
-              child: Container(
-                padding: const EdgeInsets.all(10.0),
-                child: Text(
-                  _subscriptionTypeText,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            _isAvailable != true
-                ? Card(
-                    child: Column(
-                      children: const [
-                        Divider(),
-                        ListTile(
-                          title: Text('Not connected'),
-                          subtitle: Text(
-                              'Unable to connect to the payments processor.'),
-                        ),
-                      ],
-                    ),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(children: [
+            !OnePref.getBool("subscribed")!
+                ? Text(
+                    "You have $coins coin(s)",
                   )
-                : Container(),
-          ]);
-  }
-
-  Card _buildProductList() {
-    if (_loading) {
-      return const Card(
-        child: ListTile(
-          leading: CircularProgressIndicator(),
-          title: Text('Fetching products...'),
-        ),
-      );
-    }
-
-    if (!_isAvailable) {
-      return const Card();
-    }
-
-    final List<ListTile> productList = <ListTile>[];
-    if (_notFoundIds.isNotEmpty) {
-      productList.add(
-        const ListTile(
-          title: Text(
-            'Technical Error',
-          ),
-          subtitle: Text(
-              'Oops something went wrong, check if you have internet access.'),
-        ),
-      );
-    }
-
-    productList.addAll(_products.map(
-      (ProductDetails productDetails) {
-        return ListTile(
-          title: Text(
-            productDetails.title,
-          ),
-          subtitle: Container(
-            margin: const EdgeInsets.only(top: 5),
-            child: Text(
-              productDetails.description,
-            ),
-          ),
-          trailing: TextButton(
-            style: Platform.isIOS
-                ? TextButton.styleFrom(
-                    foregroundColor: Colors.white, backgroundColor: Colors.blue)
-                : TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.blue,
+                : const Text(
+                    "Unlimited Coins",
                   ),
-            onPressed: () {
-              late PurchaseParam purchaseParam;
-              if (Platform.isAndroid) {
-                purchaseParam = GooglePlayPurchaseParam(
-                    productDetails: productDetails,
-                    applicationUserName: null,
-                    changeSubscriptionParam: null);
-              } else {
-                purchaseParam = PurchaseParam(
-                  productDetails: productDetails,
-                  applicationUserName: null,
-                );
-              }
-
-              if (productDetails.id == coins_10Id ||
-                  productDetails.id == coins_20Id ||
-                  productDetails.id == coins_30Id) {
-                _inAppPurchase.buyConsumable(
-                    purchaseParam: purchaseParam,
-                    autoConsume: _kAutoConsume || Platform.isIOS);
-              } else {
-                _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
-              }
-            },
-            child: Text(productDetails.price,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.normal,
+            const SizedBox(
+              height: 20,
+            ),
+            Expanded(
+              child: !_loading
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          CircularProgressIndicator(),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text("Loading Products...")
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: _products.length,
+                      itemBuilder: ((context, index) {
+                        return Card(
+                          child: ListTile(
+                            title: Text(
+                              _products[index].title,
+                            ),
+                            subtitle: Container(
+                              margin: const EdgeInsets.only(top: 5),
+                              child: Text(
+                                _products[index].description,
+                              ),
+                            ),
+                            trailing: TextButton(
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Colors.orange,
+                              ),
+                              onPressed: () {
+                                _handlePurchase(_products[index]);
+                              },
+                              child: Text(
+                                _products[index].price,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+            ),
+            Container(
+                padding: const EdgeInsets.all(10),
+                child: const Text(
+                  "Terms and Conditions",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
                 )),
-          ),
-        );
-      },
-    ));
-
-    return Card(
-      elevation: 4,
-      child: Column(
-        children: productList,
+            const Text(
+              "By subscribing you get access to unlimited coins, remove ads and premium features.",
+              textAlign: TextAlign.center,
+            ),
+          ]),
+        ),
       ),
     );
   }
 
-  Future<void> deliverProduct(PurchaseDetails purchaseDetails) async {
+  Future<void> establishConnection() async {
+    final bool isConnected = await _inAppPurchase.isAvailable();
+    if (isConnected) {
+      setState(() {
+        _isAvailable = isConnected;
+      });
+      getProducts();
+    }
+  }
+
+  Future<void> getProducts() async {
+    final ProductDetailsResponse productDetailResponse =
+        await _inAppPurchase.queryProductDetails(productIds.toSet());
+    if (productDetailResponse.productDetails.isNotEmpty) {
+      setState(() {
+        _products = productDetailResponse.productDetails;
+        _notFoundIds = productDetailResponse.notFoundIDs;
+        _purchasePending = false;
+        _loading = true;
+      });
+    } else {
+      setState(() {
+        _purchasePending = false;
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _handlePurchase(ProductDetails productDetails) async {
+    late PurchaseParam purchaseParam;
+
+    Platform.isAndroid
+        ? purchaseParam = GooglePlayPurchaseParam(
+            productDetails: productDetails,
+            applicationUserName: null,
+          )
+        : purchaseParam = PurchaseParam(
+            productDetails: productDetails,
+            applicationUserName: null,
+          );
+
+    switch (productDetails.id) {
+      case coins_10Id:
+      case coins_20Id:
+      case coins_30Id:
+        _inAppPurchase.buyConsumable(
+            purchaseParam: purchaseParam, autoConsume: true);
+        break;
+      default:
+        _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+        break;
+    }
+  }
+
+  Future<void> _deliverProduct(PurchaseDetails purchaseDetails) async {
     if (purchaseDetails.productID == coins_10Id) {
       setState(() {
         coins = OnePref.getInt("coins") ?? 0;
-        coins = coins + 15;
+        coins = coins + 10;
         OnePref.setInt("coins", coins);
       });
     } else if (purchaseDetails.productID == coins_20Id) {
       setState(() {
         coins = OnePref.getInt("coins") ?? 0;
-        coins = coins + 5;
+        coins = coins + 20;
         OnePref.setInt("coins", coins);
       });
     } else if (purchaseDetails.productID == coins_30Id) {
       setState(() {
         coins = OnePref.getInt("coins") ?? 0;
-        coins = coins + 22;
+        coins = coins + 30;
         OnePref.setInt("coins", coins);
       });
     } else if (purchaseDetails.productID == weeklySubscriptionId) {
       ManageSubscription.updateWeeklySub(purchaseDetails);
     } else if (purchaseDetails.productID == monthlySubscriptionId) {
       ManageSubscription.updateMonthlySub(purchaseDetails);
-    } else {
-      setState(() {
-        _purchases.add(purchaseDetails);
-      });
     }
     setState(() {
       _purchasePending = false;
+      _purchases.add(purchaseDetails);
     });
   }
 
   void handleError(IAPError error) {
+    // ignore: avoid_print
+    print("Error caught: $error");
     setState(() {
       _purchasePending = false;
     });
   }
 
   void _handleInvalidPurchase(PurchaseDetails purchaseDetails) {
-    // handle invalid purchase here if  _verifyPurchase` failed.
+    // ignore: avoid_print
+    print("There was error purchase productId ${purchaseDetails.productID}");
   }
 
   void checkSubscription(List<PurchaseDetails> purchaseDetailsList) {
@@ -386,7 +291,6 @@ class _StoreState extends State<Store> {
   Future<void> _listenToPurchaseUpdated(
       List<PurchaseDetails> purchaseDetailsList) async {
     checkSubscription(purchaseDetailsList);
-
     for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
       if (purchaseDetails.status == PurchaseStatus.pending) {
         setState(() {
@@ -400,13 +304,16 @@ class _StoreState extends State<Store> {
           //
           //
           if (Platform.isAndroid) {
-            if (!_kAutoConsume && purchaseDetails.productID == coins_10Id ||
-                purchaseDetails.productID == coins_20Id ||
-                purchaseDetails.productID == coins_30Id) {
-              final InAppPurchaseAndroidPlatformAddition androidAddition =
-                  _inAppPurchase.getPlatformAddition<
-                      InAppPurchaseAndroidPlatformAddition>();
-              await androidAddition.consumePurchase(purchaseDetails);
+            switch (purchaseDetails.productID) {
+              case coins_10Id:
+              case coins_20Id:
+              case coins_30Id:
+                final InAppPurchaseAndroidPlatformAddition androidAddition =
+                    _inAppPurchase.getPlatformAddition<
+                        InAppPurchaseAndroidPlatformAddition>();
+                await androidAddition.consumePurchase(purchaseDetails);
+                break;
+              default:
             }
           }
           //
@@ -414,7 +321,7 @@ class _StoreState extends State<Store> {
           if (purchaseDetails.pendingCompletePurchase) {
             await _inAppPurchase.completePurchase(purchaseDetails);
           }
-          deliverProduct(purchaseDetails);
+          _deliverProduct(purchaseDetails);
         } else {
           _handleInvalidPurchase(purchaseDetails);
         }

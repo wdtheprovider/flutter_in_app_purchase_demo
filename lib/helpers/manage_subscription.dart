@@ -9,7 +9,7 @@ class ManageSubscription {
   static void updateWeeklySub(PurchaseDetails purchaseDetails) {
     if (purchaseDetails.status == PurchaseStatus.restored ||
         purchaseDetails.status == PurchaseStatus.purchased) {
-      OnePref.setBool("subcribed", true);
+      OnePref.setPremium(true);
       OnePref.setString("subType", "Weekly");
     } else {
       resetSubscription();
@@ -22,7 +22,7 @@ class ManageSubscription {
   static void updateMonthlySub(PurchaseDetails purchaseDetails) {
     if (purchaseDetails.status == PurchaseStatus.restored ||
         purchaseDetails.status == PurchaseStatus.purchased) {
-      OnePref.setBool("subcribed", true);
+      OnePref.setPremium(true);
       OnePref.setString("subType", "Monthly");
     } else {
       resetSubscription();
@@ -33,9 +33,9 @@ class ManageSubscription {
   static void updateRemoveAds(PurchaseDetails purchaseDetails) {
     if (purchaseDetails.status == PurchaseStatus.restored ||
         purchaseDetails.status == PurchaseStatus.purchased) {
-      OnePref.setBool("removeAds", true);
+      OnePref.setRemoveAds(true);
     } else {
-      OnePref.setBool("removeAds", false);
+      OnePref.setRemoveAds(false);
     }
   }
 
@@ -44,7 +44,7 @@ class ManageSubscription {
   //This method will reset and deactivate the subscription in the app.
   //and deactivate the subscription by using a sharedPreferences
   static void resetSubscription() {
-    OnePref.setBool("subcribed", false);
+    OnePref.setPremium(false);
     OnePref.setString("subType", "None");
   }
 }
