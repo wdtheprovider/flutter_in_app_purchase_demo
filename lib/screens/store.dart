@@ -5,7 +5,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_in_app_purchase_demo/helpers/manage_subscription.dart';
+import 'package:flutter_in_app_purchase_demo/helpers/manage_purchases.dart';
 
 import 'package:in_app_purchase/in_app_purchase.dart';
 // ignore: depend_on_referenced_packages
@@ -69,7 +69,8 @@ class _StoreState extends State<Store> {
     final Stream<List<PurchaseDetails>> purchaseUpdated =
         _inAppPurchase.purchaseStream;
 
-    _subscription =  purchaseUpdated.listen((List<PurchaseDetails> purchaseDetailsList) {
+    _subscription =
+        purchaseUpdated.listen((List<PurchaseDetails> purchaseDetailsList) {
       _listenToPurchaseUpdated(purchaseDetailsList);
       checkSubscription(purchaseDetailsList);
     }, onDone: () {
@@ -108,6 +109,20 @@ class _StoreState extends State<Store> {
                 : const Text(
                     "Unlimited Coins",
                   ),
+            const SizedBox(
+              height: 20,
+            ),
+            TextButton(
+                onPressed: () {
+                  if (coins > 0) {
+                    setState(() {
+                      coins = OnePref.getInt("coins") ?? 0;
+                      coins = coins - 1;
+                      OnePref.setInt("coins", coins);
+                    });
+                  }
+                },
+                child: const Text("Use Coins")),
             const SizedBox(
               height: 20,
             ),
@@ -251,9 +266,9 @@ class _StoreState extends State<Store> {
         OnePref.setInt("coins", coins);
       });
     } else if (purchaseDetails.productID == weeklySubscriptionId) {
-      ManageSubscription.updateWeeklySub(purchaseDetails);
+      ManagePurchases.updateWeeklySub(purchaseDetails);
     } else if (purchaseDetails.productID == monthlySubscriptionId) {
-      ManageSubscription.updateMonthlySub(purchaseDetails);
+      ManagePurchases.updateMonthlySub(purchaseDetails);
     }
     setState(() {
       _purchasePending = false;
@@ -278,18 +293,17 @@ class _StoreState extends State<Store> {
     if (purchaseDetailsList.isNotEmpty) {
       for (int i = 0; i < purchaseDetailsList.length; i++) {
         if (purchaseDetailsList[i].productID == weeklySubscriptionId) {
-          ManageSubscription.updateWeeklySub(purchaseDetailsList[i]);
+          ManagePurchases.updateWeeklySub(purchaseDetailsList[i]);
         } else if (purchaseDetailsList[i].productID == monthlySubscriptionId) {
-          ManageSubscription.updateMonthlySub(purchaseDetailsList[i]);
+          ManagePurchases.updateMonthlySub(purchaseDetailsList[i]);
         }
       }
     } else {
-      ManageSubscription.resetSubscription();
+      ManagePurchases.resetSubscription();
     }
   }
 
-  Future<void> _listenToPurchaseUpdated(
-      List<PurchaseDetails> purchaseDetailsList) async {
+  Future<void> _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) async {
     checkSubscription(purchaseDetailsList);
     for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
       if (purchaseDetails.status == PurchaseStatus.pending) {

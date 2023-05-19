@@ -34,19 +34,36 @@ class _MyHomePageState extends State<MyHomePage> {
           title: const Text("Flutter In App Purchase Demo"),
         ),
         body: Center(
-          child: TextButton(
-              onPressed: () => {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: ((context) => const Store()),
-                      ),
-                    )
-                  },
-              child: const Text(
-                "Open Store",
-                style: TextStyle(fontSize: 20),
-              )),
+          child: Column(
+            children: [
+              TextButton(
+                  onPressed: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: ((context) => const Store()),
+                          ),
+                        )
+                      },
+                  child: const Text(
+                    "Open Store",
+                    style: TextStyle(fontSize: 20),
+                  )),
+              TextButton(
+                  onPressed: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: ((context) => const Store()),
+                          ),
+                        )
+                      },
+                  child: const Text(
+                    "Open 2nd Store",
+                    style: TextStyle(fontSize: 20),
+                  )),
+            ],
+          ),
         ));
   }
 }
