@@ -81,7 +81,7 @@ class _StoreState extends State<Store> {
 
     establishConnection();
 
-    coins = OnePref.getInt("coins") ?? 0;
+    coins = OnePref.getInt("reward") ?? 0;
   }
 
   @override

@@ -1,7 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:onepref/onepref.dart';
 
-class ManagePurchases {
+class ManagePurchases extends ChangeNotifier {
   //
   //
   //This method will check if the user has purchased the weekly subscription
