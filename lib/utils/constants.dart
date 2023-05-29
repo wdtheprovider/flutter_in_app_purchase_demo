@@ -16,6 +16,8 @@ class Constants {
     "Unlimited coins"
   ];
 
+  static List<String> benefitRemoveAd = ["Remove Ads"];
+
   static const String appName = "F-InAppDemo";
   static Color txtColor = Colors.brown.shade800;
 }

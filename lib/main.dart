@@ -1,12 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_in_app_purchase_demo/screens/dashboard.dart';
-import 'package:flutter_in_app_purchase_demo/screens/menu.dart';
-import 'package:flutter_in_app_purchase_demo/screens/settings.dart';
+import 'package:flutter_in_app_purchase_demo/screens/pages/dashboard.dart';
+import 'package:flutter_in_app_purchase_demo/screens/pages/menu.dart';
+import 'package:flutter_in_app_purchase_demo/screens/pages/settings.dart';
 import 'package:flutter_in_app_purchase_demo/utils/constants.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:onepref/onepref.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
   await OnePref.init();
   runApp(const MyApp());
 }
@@ -45,45 +49,78 @@ class _MyHomePageState extends State<MyHomePage> {
     const Settings(),
   ];
 
+  BannerAd? _bannerAd;
+  bool _isLoaded = false;
+
+  final adUnitId = Platform.isAndroid
+      ? 'ca-app-pub-3940256099942544/6300978111'
+      : 'ca-app-pub-3940256099942544/2934735716';
+
   @override
   void initState() {
     super.initState();
+    loadAd();
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(
-        title: Text(
-          Constants.appName,
-          style: TextStyle(
-            color: Constants.txtColor,
+        appBar: AppBar(
+          elevation: 0,
+          title: Text(
+            Constants.appName,
+            style: TextStyle(
+              color: Constants.txtColor,
+            ),
           ),
         ),
-      ),
-      body: SafeArea(child: screens[currentIndex]),
-      bottomNavigationBar: BottomNavigationBar(
-        showSelectedLabels: false,
-        backgroundColor: Colors.orange,
-        selectedItemColor: Colors.white,
-        showUnselectedLabels: false,
-        currentIndex: currentIndex,
-        onTap: (index) {
-          setState(() => currentIndex = index);
-          // Respond to item press.
+        body: SafeArea(child: screens[currentIndex]),
+        bottomNavigationBar: BottomNavigationBar(
+          showSelectedLabels: false,
+          backgroundColor: Colors.orange,
+          selectedItemColor: Colors.white,
+          showUnselectedLabels: false,
+          currentIndex: currentIndex,
+          onTap: (index) {
+            setState(() => currentIndex = index);
+            // Respond to item press.
+          },
+          items: const [
+            BottomNavigationBarItem(
+              label: "Dashboard",
+              icon: Icon(Icons.dashboard),
+            ),
+            BottomNavigationBarItem(
+              label: "Store",
+              icon: Icon(Icons.store),
+            ),
+            BottomNavigationBarItem(
+              label: "Settings",
+              icon: Icon(Icons.settings),
+            ),
+          ],
+        ),
+      );
+
+  void loadAd() {
+    _bannerAd = BannerAd(
+      adUnitId: adUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {
+          debugPrint('$ad loaded.');
+          setState(() {
+            _isLoaded = true;
+          });
         },
-        items: const [
-          BottomNavigationBarItem(
-            label: "Dashboard",
-            icon: Icon(Icons.dashboard),
-          ),
-          BottomNavigationBarItem(
-            label: "Store",
-            icon: Icon(Icons.store),
-          ),
-          BottomNavigationBarItem(
-            label: "Settings",
-            icon: Icon(Icons.settings),
-          ),
-        ],
-      ));
+        // Called when an ad request failed.
+        onAdFailedToLoad: (ad, err) {
+          debugPrint('BannerAd failed to load: ${err.message}');
+          // Dispose the ad here to free resources.
+          ad.dispose();
+        },
+      ),
+    )..load();
+  }
 }

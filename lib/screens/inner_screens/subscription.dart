@@ -1,14 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_in_app_purchase_demo/utils/benefit.dart';
 import 'package:flutter_in_app_purchase_demo/utils/constants.dart';
-import 'package:flutter_in_app_purchase_demo/utils/on_click_animation.dart';
 // ignore: depend_on_referenced_packages
 import 'package:in_app_purchase/in_app_purchase.dart';
+// ignore: depend_on_referenced_packages
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
 import 'package:onepref/onepref.dart';
+
+import '../../main.dart';
 
 class Subscriptions extends StatefulWidget {
   const Subscriptions({super.key});
@@ -121,12 +122,19 @@ class _SubscriptionsState extends State<Subscriptions> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       OnClickAnimation(
-                        onTap: () => {},
-                        child: const Icon(
-                          Icons.arrow_back,
-                          color: Colors.white,
-                        ),
-                      ),
+                          onTap: () => {
+                                Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const MyHomePage()),
+                                    (Route<dynamic> route) => false)
+                              },
+                          child: const Text(
+                            "Dismiss",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          )),
                       OnClickAnimation(
                         onTap: () async => {
                           await InAppPurchase.instance.restorePurchases().then(

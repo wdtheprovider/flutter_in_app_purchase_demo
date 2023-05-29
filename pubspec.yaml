@@ -13,12 +13,13 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
-  onepref: ^0.0.7
+  onepref: ^0.0.8
   provider: ^6.0.5
   settings_ui: ^2.0.2
   url_launcher: ^6.1.11
   font_awesome_flutter: ^10.4.0
   percent_indicator: ^4.2.3
+  google_mobile_ads: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -32,6 +33,7 @@ flutter:
   assets: 
       - assets/images/coins_bg.jpeg
       - lib/images/coins_bg.jpeg
+      - lib/images/rm_ads_bg.jpg
       - lib/images/sub_bg.jpeg
 
   # example:
