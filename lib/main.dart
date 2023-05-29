@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_in_app_purchase_demo/helpers/manage_consumable_items.dart';
-import 'package:flutter_in_app_purchase_demo/screens/consumable_items.dart';
-import 'package:flutter_in_app_purchase_demo/screens/store.dart';
+import 'package:flutter_in_app_purchase_demo/screens/dashboard.dart';
+import 'package:flutter_in_app_purchase_demo/screens/menu.dart';
+import 'package:flutter_in_app_purchase_demo/screens/settings.dart';
+import 'package:flutter_in_app_purchase_demo/utils/constants.dart';
 import 'package:onepref/onepref.dart';
-import 'package:provider/provider.dart';
 
-import 'helpers/manage_purchases.dart';
-import 'helpers/store_engine.dart';
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await OnePref.init();
   runApp(const MyApp());
 }
 
@@ -16,29 +15,18 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (context) => ManageConsumables(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => ManagePurchases(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => IApEngine(),
-        ),
-      ],
-      child: MaterialApp(
+  Widget build(BuildContext context) => MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Flutter In App Purchase Demo',
+        title: Constants.appName,
         theme: ThemeData(
           primarySwatch: Colors.orange,
         ),
+        darkTheme: ThemeData(
+          primarySwatch: Colors.orange,
+        ),
+        themeMode: ThemeMode.dark,
         home: const MyHomePage(),
-      ),
-    );
-  }
+      );
 }
 
 class MyHomePage extends StatefulWidget {
@@ -49,77 +37,53 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late int selectedRadioTile;
-  late int selectedRadio;
+  int currentIndex = 0;
+
+  final screens = [
+    const Dashboard(),
+    const Menu(),
+    const Settings(),
+  ];
 
   @override
   void initState() {
     super.initState();
-    selectedRadio = 0;
-    selectedRadioTile = 0;
-    OnePref.init();
-  }
-
-  setSelectedRadioTile(int val) {
-    setState(() {
-      selectedRadioTile = val;
-    });
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text("Flutter In App Purchase Demo"),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () => {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((context) => const ConsumableItems()),
-                    ),
-                  )
-                },
-                child: const Text(
-                  "Consumable Items",
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
-              TextButton(
-                onPressed: () => {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((context) => const ConsumableItems()),
-                    ),
-                  )
-                },
-                child: const Text(
-                  "Non-Consumable Items",
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
-              TextButton(
-                onPressed: () => {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((context) => const Store()),
-                    ),
-                  )
-                },
-                child: const Text(
-                  "Subscriptions",
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
-            ],
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(
+        title: Text(
+          Constants.appName,
+          style: TextStyle(
+            color: Constants.txtColor,
           ),
-        ));
-  }
+        ),
+      ),
+      body: SafeArea(child: screens[currentIndex]),
+      bottomNavigationBar: BottomNavigationBar(
+        showSelectedLabels: false,
+        backgroundColor: Colors.orange,
+        selectedItemColor: Colors.white,
+        showUnselectedLabels: false,
+        currentIndex: currentIndex,
+        onTap: (index) {
+          setState(() => currentIndex = index);
+          // Respond to item press.
+        },
+        items: const [
+          BottomNavigationBarItem(
+            label: "Dashboard",
+            icon: Icon(Icons.dashboard),
+          ),
+          BottomNavigationBarItem(
+            label: "Store",
+            icon: Icon(Icons.store),
+          ),
+          BottomNavigationBarItem(
+            label: "Settings",
+            icon: Icon(Icons.settings),
+          ),
+        ],
+      ));
 }

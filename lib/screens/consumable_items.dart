@@ -4,13 +4,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_in_app_purchase_demo/utils/on_click_animation.dart';
+// ignore: depend_on_referenced_packages
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:onepref/onepref.dart';
-import 'package:provider/provider.dart';
 // ignore: depend_on_referenced_packages
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
-import '../helpers/store_engine.dart';
 import '../utils/constants.dart';
 
 class ConsumableItems extends StatefulWidget {
@@ -31,6 +31,12 @@ class _ConsumableItemsState extends State<ConsumableItems> {
   int? selectedProduct = 0;
   int reward = 0;
 
+  List<ProductId> storeProductIds = <ProductId>[
+    ProductId(id: "test_coins_111", isConsumable: true, reward: 10),
+    ProductId(id: "test_coins_201", isConsumable: true, reward: 20),
+    ProductId(id: "test_coins_30", isConsumable: true, reward: 30),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -49,7 +55,7 @@ class _ConsumableItemsState extends State<ConsumableItems> {
     // Querying the products from Google Play
     await iApEngine.getIsAvailable().then((isAvailable) async {
       if (isAvailable) {
-        await iApEngine.queryProducts().then((value) => {
+        await iApEngine.queryProducts(storeProductIds).then((value) => {
               setState(() {
                 _isAvailable = isAvailable;
                 _products.addAll(value
@@ -75,7 +81,9 @@ class _ConsumableItemsState extends State<ConsumableItems> {
       if (purchaseDetails.status == PurchaseStatus.purchased ||
           purchaseDetails.status == PurchaseStatus.restored) {
         if (Platform.isAndroid &&
-            iApEngine.getProductIdsOnly().contains(purchaseDetails.productID)) {
+            iApEngine
+                .getProductIdsOnly(storeProductIds)
+                .contains(purchaseDetails.productID)) {
           final InAppPurchaseAndroidPlatformAddition androidAddition = iApEngine
               .inAppPurchase
               .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
@@ -94,7 +102,7 @@ class _ConsumableItemsState extends State<ConsumableItems> {
   void deliverProduct(PurchaseDetails purchaseDetails) {
     reward = OnePref.getInt(Constants.rewardKey) ?? 0;
     _purchases.add(purchaseDetails);
-    for (var product in Constants.storeProductIds) {
+    for (var product in storeProductIds) {
       if (purchaseDetails.productID == product.id && product.isConsumable) {
         setState(() {
           reward = reward + product.reward!;
@@ -106,55 +114,134 @@ class _ConsumableItemsState extends State<ConsumableItems> {
   }
 
   @override
-  Widget build(BuildContext context) => Consumer<IApEngine>(
-        builder: (context, value, child) => Scaffold(
-          appBar: AppBar(
-              title: Text(
-            "Consumable Items ${_products.length}",
-            style: const TextStyle(color: Colors.white),
-          )),
-          body: SafeArea(
-              child: Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(10),
-            child: Column(children: [
-              Expanded(
+  Widget build(BuildContext context) => Scaffold(
+        body: SafeArea(
+            child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.black,
+            image: DecorationImage(
+              image: AssetImage('lib/images/coins_bg.jpeg'),
+              fit: BoxFit.cover,
+              opacity: 0.3,
+            ),
+          ),
+          padding: const EdgeInsets.only(top: 100, bottom: 40),
+          child: Column(children: [
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: const [
+                        Text(
+                          "203",
+                          style: TextStyle(
+                              color: Colors.deepOrangeAccent,
+                              fontSize: 60,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          "Remaining coins",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    child: OnClickAnimation(
+                      onTap: () => {},
+                      child: Card(
+                        color: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: Text(
+                            "USE COINS",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 25,
+            ),
+            Expanded(
+              flex: 4,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: ListView.builder(
                     itemCount: _products.length,
                     itemBuilder: ((context, index) => Card(
-                          color: Colors.green,
+                          color: Colors.grey,
                           child: RadioListTile<int>(
                             value: index,
                             groupValue: selectedProduct,
-                            title: Text(_products[index].title),
-                            subtitle: Text(_products[index].description),
+                            title: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Text(
+                                _products[index].title,
+                                style: TextStyle(
+                                    color: Constants.txtColor,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            subtitle: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Text(_products[index].description),
+                            ),
                             onChanged: (productIndex) {
                               setSelectedProduct(productIndex);
                             },
                             activeColor: Colors.red,
-                            secondary: Text(_products[index].price),
+                            secondary: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(_products[index].price),
+                              ],
+                            ),
                           ),
                         ))),
               ),
-              Row(
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 25.0),
+              child: Row(
                 children: [
                   Expanded(
                     child: Card(
-                      color: Colors.orange,
+                      color: Colors.green,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(80),
                       ),
                       child: TextButton(
                         onPressed: () {
-                          iApEngine
-                              .handlePurchase(_products[selectedProduct ?? 0]);
+                          iApEngine.handlePurchase(
+                              _products[selectedProduct ?? 0], storeProductIds);
                         },
                         child: Text(
-                          "Buy $reward",
+                          _products.isNotEmpty
+                              ? "Buy ${_products[selectedProduct ?? 0].price}"
+                              : "Loading ...",
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 14,
+                              fontSize: 16,
                               fontWeight: FontWeight.normal),
                         ),
                       ),
@@ -162,8 +249,8 @@ class _ConsumableItemsState extends State<ConsumableItems> {
                   ),
                 ],
               ),
-            ]),
-          )),
-        ),
+            ),
+          ]),
+        )),
       );
 }
