@@ -49,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
     const Settings(),
   ];
 
-  BannerAd? _bannerAd;
+  late BannerAd _bannerAd;
   bool _isLoaded = false;
 
   final adUnitId = Platform.isAndroid
@@ -73,7 +73,23 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
         ),
-        body: SafeArea(child: screens[currentIndex]),
+        body: SafeArea(
+            child: Column(
+          children: [
+            Expanded(child: screens[currentIndex]),
+            Visibility(
+              visible: _isLoaded,
+              child: _isLoaded
+                  ? Container(
+                      alignment: Alignment.center,
+                      width: MediaQuery.of(context).size.width,
+                      height: _bannerAd.size.height.toDouble(),
+                      child: AdWidget(ad: _bannerAd),
+                    )
+                  : Container(),
+            ),
+          ],
+        )),
         bottomNavigationBar: BottomNavigationBar(
           showSelectedLabels: false,
           backgroundColor: Colors.orange,
@@ -109,14 +125,14 @@ class _MyHomePageState extends State<MyHomePage> {
       listener: BannerAdListener(
         // Called when an ad is successfully received.
         onAdLoaded: (ad) {
-          debugPrint('$ad loaded.');
+          print('$ad loaded.');
           setState(() {
             _isLoaded = true;
           });
         },
         // Called when an ad request failed.
         onAdFailedToLoad: (ad, err) {
-          debugPrint('BannerAd failed to load: ${err.message}');
+          print('BannerAd failed to load: ${err.message}');
           // Dispose the ad here to free resources.
           ad.dispose();
         },

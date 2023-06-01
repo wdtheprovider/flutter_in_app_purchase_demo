@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_in_app_purchase_demo/components/snackbar.dart';
 import 'package:flutter_in_app_purchase_demo/main.dart';
 import 'package:flutter_in_app_purchase_demo/utils/constants.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 // ignore: depend_on_referenced_packages
 import 'package:in_app_purchase/in_app_purchase.dart';
 // ignore: depend_on_referenced_packages
@@ -21,25 +23,60 @@ class _NonConsumableState extends State<NonConsumable> {
   late final List<ProductDetails> _products = <ProductDetails>[];
   IApEngine iApEngine = IApEngine();
   bool adsRemoved = false;
+  bool isRestore = false;
   final List<ProductId> _productsIds = [
     ProductId(id: "test_remove_ads1", isConsumable: false),
+    ProductId(id: "fb_remove_ads_lifetime", isConsumable: false),
   ];
+
+  late BannerAd _bannerAd;
+  bool _isLoaded = false;
+
+  final adUnitId = Platform.isAndroid
+      ? 'ca-app-pub-3940256099942544/6300978111'
+      : 'ca-app-pub-3940256099942544/2934735716';
 
   @override
   void initState() {
     super.initState();
 
-    adsRemoved = OnePref.getPremium()!;
+    adsRemoved = OnePref.getRemoveAds()!;
 
     iApEngine.inAppPurchase.purchaseStream.listen((purchaseDetailsList) {
       //listen to the purchases
       listenPurchasedActivities(purchaseDetailsList);
+
+      if (purchaseDetailsList.isEmpty && isRestore) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          openSnackBar(
+            context: context,
+            btnName: "OK",
+            title: "Restore",
+            message: "Oops! You do not have a purchase to restore",
+            color: Colors.accents,
+            bgColor: Constants.txtColor,
+          );
+        });
+      } else if (purchaseDetailsList.isNotEmpty && isRestore) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          openSnackBar(
+            context: context,
+            btnName: "OK",
+            title: "Restore",
+            message:
+                "Congrats! You got a purchase to restore, it will be restored in a sec.",
+            color: Colors.accents,
+            bgColor: Colors.green,
+          );
+        });
+      }
     }, onDone: () {
       print("onDone");
     }, onError: (Object error) {
       print("onError");
     });
 
+    loadAd();
     //get products
     getProducts();
   }
@@ -55,6 +92,24 @@ class _NonConsumableState extends State<NonConsumable> {
                   })
             }
         });
+  }
+
+  void loadAd() {
+    _bannerAd = BannerAd(
+      adUnitId: adUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _isLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          ad.dispose();
+        },
+      ),
+    )..load();
   }
 
   Future<void> listenPurchasedActivities(List<PurchaseDetails> list) async {
@@ -134,11 +189,12 @@ class _NonConsumableState extends State<NonConsumable> {
                       OnClickAnimation(
                         onTap: () async => {
                           await InAppPurchase.instance.restorePurchases().then(
-                                (value) => {
-                                  _products.clear(),
-                                  getProducts(),
-                                },
-                              ),
+                            (value) {
+                              isRestore = true;
+                              _products.clear();
+                              getProducts();
+                            },
+                          ),
                         },
                         child: const Text(
                           "Restore",
@@ -274,11 +330,22 @@ class _NonConsumableState extends State<NonConsumable> {
                     ),
                   ),
                 ),
+                Visibility(
+                  visible: _isLoaded && OnePref.getRemoveAds() == false,
+                  child: _isLoaded
+                      ? Container(
+                          alignment: Alignment.center,
+                          width: MediaQuery.of(context).size.width,
+                          height: _bannerAd.size.height.toDouble(),
+                          child: AdWidget(ad: _bannerAd),
+                        )
+                      : Container(),
+                ),
                 const Padding(
                   padding:
                       EdgeInsets.symmetric(vertical: 25.0, horizontal: 25.0),
                   child: Text(
-                    "Ads will be removed lifetime and you can restore the purchase later too.",
+                    "The Ad above will be used for only this screen to test the remove ad functionality.\n-----------------------\n Please note that the other ads you see, they are for the demo.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
