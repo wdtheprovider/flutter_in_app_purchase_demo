@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "254653614551",
+    "project_id": "f-inapp-purchase-demo",
+    "storage_bucket": "f-inapp-purchase-demo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:254653614551:android:e5a8a10741b556189ae392",
+        "android_client_info": {
+          "package_name": "com.wdtheprovider.finapppurchase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "254653614551-i8oum2pjv92c2dl2f9oilqg2vrtns057.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9uD21-l-bVSATGR3sxXchbJrPuv01wWc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "254653614551-i8oum2pjv92c2dl2f9oilqg2vrtns057.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "254653614551-31i4ki135n6as620cqkiu8f57vpb2tkf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wdtheprovider.inapppurchase"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

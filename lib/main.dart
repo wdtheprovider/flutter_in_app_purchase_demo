@@ -78,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Expanded(child: screens[currentIndex]),
             Visibility(
-              visible: _isLoaded,
+              visible: _isLoaded && OnePref.getPremium() == false,
               child: _isLoaded
                   ? Container(
                       alignment: Alignment.center,

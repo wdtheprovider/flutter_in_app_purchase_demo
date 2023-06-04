@@ -4,6 +4,7 @@ import 'package:flutter_in_app_purchase_demo/screens/inner_screens/subscription.
 import 'package:flutter_in_app_purchase_demo/utils/constants.dart';
 import 'package:onepref/onepref.dart';
 
+import '../../components/snackbar.dart';
 import '../inner_screens/consumable_items.dart';
 
 class Dashboard extends StatefulWidget {
@@ -73,6 +74,15 @@ class _DashboardState extends State<Dashboard> {
                           reward = tempReward;
                         });
                       } else {
+                        openSnackBar(
+                          context: context,
+                          btnName: "OK",
+                          title: "Restore",
+                          message: "Oops! You ran out of coins, please top up.",
+                          color: Colors.accents,
+                          bgColor: Constants.txtColor,
+                        );
+
                         OnePref.setInt(Constants.rewardKey, 0);
                         setState(() {
                           reward = 0;
@@ -166,78 +176,84 @@ class _DashboardState extends State<Dashboard> {
             const SizedBox(
               height: 50,
             ),
-            Row(
-              children: [
-                Text(
-                  "REMOVE ADS ",
-                  style: TextStyle(
-                      color: Constants.txtColor,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold),
-                ),
-                Card(
-                  color: adsRemoved ? Colors.green : Colors.red,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+            Visibility(
+              visible: false,
+              child: Row(
+                children: [
+                  Text(
+                    "REMOVE ADS ",
+                    style: TextStyle(
+                        color: Constants.txtColor,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      adsRemoved ? "ON" : "OFF",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold),
+                  Card(
+                    color: adsRemoved ? Colors.green : Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text(
+                        adsRemoved ? "ON" : "OFF",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                  child: OnClickAnimation(
-                    onTap: () => {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => const NonConsumable()))
-                    },
-                    child: const Text(
-                      "BUY",
-                      style: TextStyle(
-                          color: Colors.green,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                    child: OnClickAnimation(
+                      onTap: () => {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const NonConsumable()))
+                      },
+                      child: const Text(
+                        "BUY",
+                        style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold),
+                      ),
                     ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
             const SizedBox(
               height: 60,
             ),
-            Row(
-              children: [
-                Expanded(
-                  child: OnClickAnimation(
-                    onTap: () => {},
-                    child: Card(
-                      color: Constants.txtColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(12.0),
-                        child: Text(
-                          "BUY THIS DEMO SOURCE CODE",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold),
+            Visibility(
+              visible: false,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OnClickAnimation(
+                      onTap: () => {},
+                      child: Card(
+                        color: Constants.txtColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: Text(
+                            "BUY THIS DEMO SOURCE CODE",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             )
           ],
         ),

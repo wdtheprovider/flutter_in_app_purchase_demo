@@ -52,23 +52,26 @@ class Menu extends StatelessWidget {
                 ),
               ],
             ),
-            Column(
-              children: [
-                btn(
-                    "Buy Non-Consumable Items",
-                    () => {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const NonConsumable()))
-                        }),
-                const Padding(
-                  padding:
-                      EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
-                  child: Text(
-                    "These items are products that a user can ONLY purchase ONCE and Own it life time. so my example will be remove ads.",
-                    textAlign: TextAlign.center,
+            Visibility(
+              visible: false,
+              child: Column(
+                children: [
+                  btn(
+                      "Buy Non-Consumable Items",
+                      () => {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const NonConsumable()))
+                          }),
+                  const Padding(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
+                    child: Text(
+                      "These items are products that a user can ONLY purchase ONCE and Own it life time. so my example will be remove ads.",
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

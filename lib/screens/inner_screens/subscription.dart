@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_in_app_purchase_demo/utils/constants.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 // ignore: depend_on_referenced_packages
 import 'package:in_app_purchase/in_app_purchase.dart';
 // ignore: depend_on_referenced_packages
@@ -9,6 +10,7 @@ import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
 import 'package:onepref/onepref.dart';
 
+import '../../components/snackbar.dart';
 import '../../main.dart';
 
 class Subscriptions extends StatefulWidget {
@@ -22,10 +24,21 @@ class _SubscriptionsState extends State<Subscriptions> {
   late final List<ProductDetails> _products = <ProductDetails>[];
   IApEngine iApEngine = IApEngine();
   bool isSubscribed = false;
+  bool isRestore = false;
+
   final List<ProductId> _productsIds = [
     ProductId(id: "test_sub_weekly1", isConsumable: false),
     ProductId(id: "test_sub_monthly1", isConsumable: false),
+    ProductId(id: "test_monthly_free_trial", isConsumable: false),
+    ProductId(id: "test_sub_yearly1", isConsumable: false),
   ];
+
+  late BannerAd _bannerAd;
+  bool _isLoaded = false;
+
+  final adUnitId = Platform.isAndroid
+      ? 'ca-app-pub-3940256099942544/6300978111'
+      : 'ca-app-pub-3940256099942544/2934735716';
 
   @override
   void initState() {
@@ -36,6 +49,30 @@ class _SubscriptionsState extends State<Subscriptions> {
     iApEngine.inAppPurchase.purchaseStream.listen((purchaseDetailsList) {
       //listen to the purchases
       listenPurchasedActivities(purchaseDetailsList);
+      if (purchaseDetailsList.isEmpty && isRestore) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          openSnackBar(
+            context: context,
+            btnName: "OK",
+            title: "Restore",
+            message: "Oops! You do not have a subscription to restore",
+            color: Colors.accents,
+            bgColor: Constants.txtColor,
+          );
+        });
+      } else if (purchaseDetailsList.isNotEmpty && isRestore) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          openSnackBar(
+            context: context,
+            btnName: "OK",
+            title: "Restore",
+            message:
+                "Congrats! You got a purchase to restore, it will be restored in a sec.",
+            color: Colors.accents,
+            bgColor: Colors.green,
+          );
+        });
+      }
     }, onDone: () {
       print("onDone");
     }, onError: (Object error) {
@@ -44,19 +81,43 @@ class _SubscriptionsState extends State<Subscriptions> {
 
     //get products
     getProducts();
+    loadAd();
   }
 
   void getProducts() async {
     await iApEngine.getIsAvailable().then((value) async => {
           if (value)
             {
-              await iApEngine.queryProducts(_productsIds).then((value) => {
-                    setState(() => {
-                          _products.addAll(value.productDetails),
-                        })
-                  })
+              await iApEngine.queryProducts(_productsIds).then((value) {
+                setState(() => {
+                      _products.addAll(value.productDetails),
+                    });
+                if (value.notFoundIDs.isNotEmpty) {
+                  print("Products not found: ${value.notFoundIDs}");
+                  print(
+                      "Please check if your configurations are correct and try again.");
+                }
+              })
             }
         });
+  }
+
+  void loadAd() {
+    _bannerAd = BannerAd(
+      adUnitId: adUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _isLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          ad.dispose();
+        },
+      ),
+    )..load();
   }
 
   Future<void> listenPurchasedActivities(List<PurchaseDetails> list) async {
@@ -138,11 +199,12 @@ class _SubscriptionsState extends State<Subscriptions> {
                       OnClickAnimation(
                         onTap: () async => {
                           await InAppPurchase.instance.restorePurchases().then(
-                                (value) => {
-                                  _products.clear(),
-                                  getProducts(),
-                                },
-                              ),
+                            (value) {
+                              isRestore = true;
+                              _products.clear();
+                              getProducts();
+                            },
+                          ),
                         },
                         child: const Text(
                           "Restore",
@@ -266,11 +328,22 @@ class _SubscriptionsState extends State<Subscriptions> {
                     ),
                   ),
                 ),
+                Visibility(
+                  visible: _isLoaded && OnePref.getPremium() == false,
+                  child: _isLoaded
+                      ? Container(
+                          alignment: Alignment.center,
+                          width: MediaQuery.of(context).size.width,
+                          height: _bannerAd.size.height.toDouble(),
+                          child: AdWidget(ad: _bannerAd),
+                        )
+                      : Container(),
+                ),
                 const Padding(
                   padding:
                       EdgeInsets.symmetric(vertical: 25.0, horizontal: 25.0),
                   child: Text(
-                    "Subscritions automatically renews monthly until canceled.",
+                    "The above ad will be removed if the user has subscribed to one of our subscrptions\n---------\nSubscritions automatically renews monthly until canceled.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
