@@ -118,7 +118,13 @@ class _NonConsumableState extends State<NonConsumable> {
           if (Platform.isAndroid &&
               iApEngine
                   .getProductIdsOnly(_productsIds)
-                  .contains(purchaseDetails.productID)) {
+                  .contains(purchaseDetails.productID) &&
+              _productsIds
+                      .where(
+                          (element) => element.id == purchaseDetails.productID)
+                      .first
+                      .isConsumable ==
+                  true) {
             final InAppPurchaseAndroidPlatformAddition androidPlatformAddition =
                 iApEngine.inAppPurchase.getPlatformAddition<
                     InAppPurchaseAndroidPlatformAddition>();

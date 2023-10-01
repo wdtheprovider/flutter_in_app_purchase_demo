@@ -177,7 +177,7 @@ class _DashboardState extends State<Dashboard> {
               height: 50,
             ),
             Visibility(
-              visible: false,
+              visible: true,
               child: Row(
                 children: [
                   Text(

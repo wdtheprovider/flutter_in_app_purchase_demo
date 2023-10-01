@@ -7,7 +7,6 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 // ignore: depend_on_referenced_packages
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
-import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 
 import 'package:onepref/onepref.dart';
 
@@ -138,7 +137,13 @@ class _SubscriptionsState extends State<Subscriptions> {
           if (Platform.isAndroid &&
               iApEngine
                   .getProductIdsOnly(_productsIds)
-                  .contains(purchaseDetails.productID)) {
+                  .contains(purchaseDetails.productID) &&
+              _productsIds
+                      .where(
+                          (element) => element.id == purchaseDetails.productID)
+                      .first
+                      .isConsumable ==
+                  true) {
             final InAppPurchaseAndroidPlatformAddition androidPlatformAddition =
                 iApEngine.inAppPurchase.getPlatformAddition<
                     InAppPurchaseAndroidPlatformAddition>();
@@ -336,30 +341,15 @@ class _SubscriptionsState extends State<Subscriptions> {
                                                                 .productID !=
                                                             _products[index]
                                                                 .id) {
-                                                      // await iApEngine
-                                                      //     .upgradeOrDowngradeSubscription(
-                                                      //         oldPurchaseDetails,
-                                                      //         _products[index])
-                                                      //     .then((value) {
-                                                      //   setState(() {
-                                                      //     subExisting = false;
-                                                      //   });
-                                                      // });
-
-                                                      PurchaseParam purchaseParam = GooglePlayPurchaseParam(
-                                                          productDetails:
-                                                              _products[index],
-                                                          changeSubscriptionParam: ChangeSubscriptionParam(
-                                                              oldPurchaseDetails:
-                                                                  oldPurchaseDetails
-                                                                      as GooglePlayPurchaseDetails,
-                                                              prorationMode:
-                                                                  ProrationMode
-                                                                      .immediateWithTimeProration));
-                                                      InAppPurchase.instance
-                                                          .buyNonConsumable(
-                                                              purchaseParam:
-                                                                  purchaseParam);
+                                                      await iApEngine
+                                                          .upgradeOrDowngradeSubscription(
+                                                              oldPurchaseDetails,
+                                                              _products[index])
+                                                          .then((value) {
+                                                        setState(() {
+                                                          subExisting = false;
+                                                        });
+                                                      });
                                                     } else {
                                                       iApEngine.handlePurchase(
                                                           _products[index],
