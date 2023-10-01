@@ -7,6 +7,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 // ignore: depend_on_referenced_packages
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 
 import 'package:onepref/onepref.dart';
 
@@ -27,17 +28,20 @@ class _SubscriptionsState extends State<Subscriptions> {
   bool isRestore = false;
 
   final List<ProductId> _productsIds = [
-    ProductId(id: "test_sub_weekly1", isConsumable: false),
-    ProductId(id: "test_sub_monthly1", isConsumable: false),
-    ProductId(id: "test_monthly_free_trial", isConsumable: false),
-    ProductId(id: "test_sub_yearly1", isConsumable: false),
+    ProductId(id: "f_weekly_sub", isConsumable: false),
+    ProductId(id: "f_monthly_sub", isConsumable: false),
+    ProductId(id: "f_yearly_sub", isConsumable: false),
   ];
 
   late BannerAd _bannerAd;
   bool _isLoaded = false;
 
+  bool subExisting = false;
+
+  late PurchaseDetails oldPurchaseDetails;
+
   final adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/6300978111'
+      ? 'ca-app-pub-1426300554937726/2293465469'
       : 'ca-app-pub-3940256099942544/2934735716';
 
   @override
@@ -47,8 +51,17 @@ class _SubscriptionsState extends State<Subscriptions> {
     isSubscribed = OnePref.getPremium()!;
 
     iApEngine.inAppPurchase.purchaseStream.listen((purchaseDetailsList) {
-      //listen to the purchases
+      //listen to the purchase
+
+      if (purchaseDetailsList.isNotEmpty) {
+        setState(() {
+          subExisting = true;
+          oldPurchaseDetails = purchaseDetailsList[0];
+        });
+      }
+
       listenPurchasedActivities(purchaseDetailsList);
+
       if (purchaseDetailsList.isEmpty && isRestore) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           openSnackBar(
@@ -89,14 +102,10 @@ class _SubscriptionsState extends State<Subscriptions> {
           if (value)
             {
               await iApEngine.queryProducts(_productsIds).then((value) {
-                setState(() => {
-                      _products.addAll(value.productDetails),
-                    });
-                if (value.notFoundIDs.isNotEmpty) {
-                  print("Products not found: ${value.notFoundIDs}");
-                  print(
-                      "Please check if your configurations are correct and try again.");
-                }
+                setState(() {
+                  _products.addAll(value.productDetails);
+                });
+                if (value.notFoundIDs.isNotEmpty) {}
               })
             }
         });
@@ -133,6 +142,9 @@ class _SubscriptionsState extends State<Subscriptions> {
             final InAppPurchaseAndroidPlatformAddition androidPlatformAddition =
                 iApEngine.inAppPurchase.getPlatformAddition<
                     InAppPurchaseAndroidPlatformAddition>();
+
+            //
+            //
             await androidPlatformAddition.consumePurchase(purchaseDetails).then(
                   (value) => setState(() => {
                         OnePref.setPremium(true),
@@ -307,10 +319,54 @@ class _SubscriptionsState extends State<Subscriptions> {
                                               ),
                                             ),
                                             trailing: OnClickAnimation(
-                                              onTap: () => {
-                                                iApEngine.handlePurchase(
-                                                    _products[index],
-                                                    _productsIds)
+                                              onTap: () async {
+                                                setState(() {
+                                                  isRestore = false;
+                                                });
+
+                                                await iApEngine.inAppPurchase
+                                                    .restorePurchases()
+                                                    .whenComplete(() async {
+                                                  await Future.delayed(
+                                                          const Duration(
+                                                              seconds: 1))
+                                                      .then((value) async {
+                                                    if (subExisting &&
+                                                        oldPurchaseDetails
+                                                                .productID !=
+                                                            _products[index]
+                                                                .id) {
+                                                      // await iApEngine
+                                                      //     .upgradeOrDowngradeSubscription(
+                                                      //         oldPurchaseDetails,
+                                                      //         _products[index])
+                                                      //     .then((value) {
+                                                      //   setState(() {
+                                                      //     subExisting = false;
+                                                      //   });
+                                                      // });
+
+                                                      PurchaseParam purchaseParam = GooglePlayPurchaseParam(
+                                                          productDetails:
+                                                              _products[index],
+                                                          changeSubscriptionParam: ChangeSubscriptionParam(
+                                                              oldPurchaseDetails:
+                                                                  oldPurchaseDetails
+                                                                      as GooglePlayPurchaseDetails,
+                                                              prorationMode:
+                                                                  ProrationMode
+                                                                      .immediateWithTimeProration));
+                                                      InAppPurchase.instance
+                                                          .buyNonConsumable(
+                                                              purchaseParam:
+                                                                  purchaseParam);
+                                                    } else {
+                                                      iApEngine.handlePurchase(
+                                                          _products[index],
+                                                          _productsIds);
+                                                    }
+                                                  });
+                                                });
                                               },
                                               child: const Text(
                                                 "Subscribe",

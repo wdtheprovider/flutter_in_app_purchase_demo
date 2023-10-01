@@ -32,9 +32,8 @@ class _ConsumableItemsState extends State<ConsumableItems> {
   int reward = 0;
 
   List<ProductId> storeProductIds = <ProductId>[
-    ProductId(id: "test_coins_111", isConsumable: true, reward: 10),
-    ProductId(id: "test_coins_201", isConsumable: true, reward: 20),
-    ProductId(id: "test_coins_30", isConsumable: true, reward: 30),
+    ProductId(id: "f_10_coins_test", isConsumable: true, reward: 10),
+    ProductId(id: "f_20_coins_test", isConsumable: true, reward: 20),
   ];
 
   @override

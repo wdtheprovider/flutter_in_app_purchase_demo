@@ -53,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isLoaded = false;
 
   final adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/6300978111'
+      ? 'ca-app-pub-1426300554937726/3563999310'
       : 'ca-app-pub-3940256099942544/2934735716';
 
   @override

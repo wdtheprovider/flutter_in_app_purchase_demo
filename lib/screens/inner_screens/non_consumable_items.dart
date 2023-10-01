@@ -33,7 +33,7 @@ class _NonConsumableState extends State<NonConsumable> {
   bool _isLoaded = false;
 
   final adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/6300978111'
+      ? 'ca-app-pub-1426300554937726/6041138784'
       : 'ca-app-pub-3940256099942544/2934735716';
 
   @override
@@ -85,11 +85,8 @@ class _NonConsumableState extends State<NonConsumable> {
     await iApEngine.getIsAvailable().then((value) async => {
           if (value)
             {
-              await iApEngine.queryProducts(_productsIds).then((value) => {
-                    setState(() => {
-                          _products.addAll(value.productDetails),
-                        })
-                  })
+              await iApEngine.queryProducts(_productsIds).then((value) =>
+                  {setState(() => _products.addAll(value.productDetails))})
             }
         });
   }
