@@ -25,8 +25,8 @@ class _NonConsumableState extends State<NonConsumable> {
   bool adsRemoved = false;
   bool isRestore = false;
   final List<ProductId> _productsIds = [
-    ProductId(id: "test_remove_ads1", isConsumable: false),
-    ProductId(id: "fb_remove_ads_lifetime", isConsumable: false),
+    ProductId(id: "a_remove_ads", isConsumable: false),
+    ProductId(id: "f_remove_ads", isConsumable: false),
   ];
 
   late BannerAd _bannerAd;
@@ -85,8 +85,11 @@ class _NonConsumableState extends State<NonConsumable> {
     await iApEngine.getIsAvailable().then((value) async => {
           if (value)
             {
-              await iApEngine.queryProducts(_productsIds).then((value) =>
-                  {setState(() => _products.addAll(value.productDetails))})
+              await iApEngine.queryProducts(_productsIds).then((value) => {
+                    setState(() => _products.addAll(value.productDetails)),
+                    print(value.error),
+                    print(value.productDetails),
+                  })
             }
         });
   }

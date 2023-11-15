@@ -13,7 +13,7 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
-  onepref: ^0.0.13
+  onepref: ^0.0.15
   provider: ^6.0.5
   settings_ui: ^2.0.2
   url_launcher: ^6.1.11

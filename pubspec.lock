@@ -140,26 +140,26 @@ packages:
     dependency: transitive
     description:
       name: in_app_purchase
-      sha256: "17074a826f32e36f6cc36effcbcf92abc3b0d8a1e02f42583eaa4c6c79d4f026"
+      sha256: bdda02b5b11b56d5e29c7f0c57c433db3452b0c8ce1c37cbfcf1de52946efd9f
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.10"
+    version: "3.1.11"
   in_app_purchase_android:
     dependency: transitive
     description:
       name: in_app_purchase_android
-      sha256: "63997b855f10799a1022939bbf02e3f59b6f400f4deee858f46fd528df5f5fab"
+      sha256: c4b84caa4e2c7ffebda444c5033fd8423cc3a45a6e1066929bbbcd4daf665db5
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0+13"
+    version: "0.3.0+15"
   in_app_purchase_platform_interface:
     dependency: transitive
     description:
       name: in_app_purchase_platform_interface
-      sha256: "463b980dd4605868534fd8e57cd7b57ca042c0dee98ed21df99196be59eb8741"
+      sha256: "5168afbc54f406f741252b66d41872c1193a0066a6edcb587176290b92e2d537"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.5"
+    version: "1.3.6"
   in_app_purchase_storekit:
     dependency: transitive
     description:
@@ -228,10 +228,10 @@ packages:
     dependency: "direct main"
     description:
       name: onepref
-      sha256: bdbf106b7c64eabae71907507a0c34e069a75cca4c0750a31ba4d787be430469
+      sha256: "17a87cd4ef0f362b21f6afbc0a1c4f6ac5f2db6fdb407eda382a0f6f77ed1202"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.13"
+    version: "0.0.15"
   path:
     dependency: transitive
     description:
@@ -316,10 +316,10 @@ packages:
     dependency: transitive
     description:
       name: shared_preferences
-      sha256: b7f41bad7e521d205998772545de63ff4e6c97714775902c199353f8bf1511ac
+      sha256: "81429e4481e1ccfb51ede496e916348668fd0921627779233bd24cc3ff6abd02"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.1"
+    version: "2.2.2"
   shared_preferences_android:
     dependency: transitive
     description:

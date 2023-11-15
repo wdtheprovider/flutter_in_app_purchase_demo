@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_in_app_purchase_demo/screens/inner_screens/non_consumable_items.dart';
+import 'package:flutter_in_app_purchase_demo/screens/inner_screens/remove_ads.dart';
 import 'package:flutter_in_app_purchase_demo/screens/inner_screens/subscription.dart';
 import 'package:flutter_in_app_purchase_demo/utils/constants.dart';
 import 'package:onepref/onepref.dart';
@@ -170,7 +171,7 @@ class _DashboardState extends State<Dashboard> {
                           fontWeight: FontWeight.bold),
                     ),
                   ),
-                )
+                ),
               ],
             ),
             const SizedBox(
@@ -225,6 +226,22 @@ class _DashboardState extends State<Dashboard> {
             ),
             const SizedBox(
               height: 60,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40.0),
+              child: OnClickAnimation(
+                onTap: () => {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const RemoveAds()))
+                },
+                child: const Text(
+                  "YouTube",
+                  style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
             Visibility(
               visible: false,
